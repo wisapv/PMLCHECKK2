@@ -10,8 +10,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // กล่องเก็บข้อมูล
 data class AddressData(val addressName: String, var isCompleted: Boolean)
@@ -21,25 +26,38 @@ class Screen3Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen3)
 
-        // ข้อมูลจำลอง (A01 ทำเสร็จแล้ว = true)
-        val myAddressList = arrayListOf(
-            AddressData("A01: Zone A", true),
-            AddressData("A02: Zone B", false),
-            AddressData("A03: Zone C", false),
-            AddressData("A04: Zone D", false),
-            AddressData("A05: Zone E", false)
-        )
-
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewAddress)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val adapter = AddressAdapter(myAddressList)
-        recyclerView.adapter = adapter
+        // 1. เชื่อมต่อ Database
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "pml_db"
+        ).build()
+
+        // 2. ดึงข้อมูลกลุ่ม Address จาก Database มาแสดง
+        lifecycleScope.launch(Dispatchers.IO) {
+            // ไปดึงชื่อกลุ่ม (เช่น BP1, CH1) ที่เราตั้งให้มันตัดคำไว้ในหน้า 2 มาครับ
+            val groups = db.inventoryDao().getAllAddrGroups()
+
+            withContext(Dispatchers.Main) {
+                // แปลงข้อมูลมาใส่กล่อง เพื่อเตรียมส่งให้โรงงานปั๊มปุ่ม
+                val myAddressList = ArrayList<AddressData>()
+                for (groupName in groups) {
+                    // สถานะเริ่มต้นคือยังเช็กไม่เสร็จ (false)
+                    myAddressList.add(AddressData(groupName, false))
+                }
+
+                // สั่งให้โรงงานประกอบปุ่มออกมาโชว์บนหน้าจอ
+                val adapter = AddressAdapter(myAddressList)
+                recyclerView.adapter = adapter
+            }
+        }
     }
 }
 
 // ------------------------------------------------------------------------
-// ส่วนของ Adapter (โรงงานปั๊มปุ่ม)
+// ส่วนของ Adapter (โรงงานปั๊มปุ่มหน้าตาเดิมที่พี่ออกแบบไว้)
 // ------------------------------------------------------------------------
 class AddressAdapter(private val dataList: ArrayList<AddressData>) :
     RecyclerView.Adapter<AddressAdapter.MyViewHolder>() {
@@ -60,6 +78,7 @@ class AddressAdapter(private val dataList: ArrayList<AddressData>) :
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val currentItem = dataList[position]
 
+        // ใส่ชื่อกลุ่ม (เช่น BP1) ลงในปุ่ม
         holder.txtAddressName.text = currentItem.addressName
 
         // เปลี่ยนสีถ้า Address นี้ทำเสร็จแล้ว
@@ -75,15 +94,10 @@ class AddressAdapter(private val dataList: ArrayList<AddressData>) :
             )
         }
 
-        // --- แก้ไขตรงนี้: ดักจับการกดปุ่มที่ตัว txtAddressName โดยตรง ---
+        // เมื่อกดที่ตัวปุ่มนี้ ให้ส่งชื่อกลุ่มข้ามไปหน้า 4
         holder.txtAddressName.setOnClickListener {
-            // สร้างคำสั่งย้ายหน้า
             val intent = Intent(holder.itemView.context, Screen4Activity::class.java)
-
-            // แนบชื่อ Address (เช่น A01) ไปให้หน้า 4 ด้วย
             intent.putExtra("SELECTED_ADDRESS", currentItem.addressName)
-
-            // สั่งเปิดหน้า 4
             holder.itemView.context.startActivity(intent)
         }
     }
