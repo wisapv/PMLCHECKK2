@@ -1,8 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
-    // ลบ alias(libs.plugins.kotlin.android) ออกแล้ว
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
 }
+
+// โค้ดส่วน android { ... } และ dependencies { ... } ด้านล่าง ปล่อยไว้เหมือนเดิม
+
+// โค้ดส่วน android { ... } และ dependencies { ... } ด้านล่าง ปล่อยไว้เหมือนเดิมได้เลยครับ
 
 android {
     namespace = "com.example.pmlcheckk"
