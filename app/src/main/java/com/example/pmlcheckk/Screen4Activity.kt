@@ -1,5 +1,6 @@
 package com.example.pmlcheckk
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room // ✅ เพิ่ม import เพื่อให้มองเห็น Room
+import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,7 +39,6 @@ class Screen4Activity : AppCompatActivity() {
         btnEdit = findViewById(R.id.btnEdit)
         btnNext = findViewById(R.id.btnNext)
 
-        // ✅ แก้ไขเป็นคำสั่งสร้าง Database ที่ถูกต้อง
         db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "pml_db"
@@ -93,16 +93,16 @@ class PartListAdapter(private val dataList: List<InventoryItem>) :
         holder.txtKbn.text = item.kbn ?: "-"
         holder.txtAddress.text = item.fullAddr
 
-        // ✅ เพิ่มคำสั่งเมื่อกดคลิกที่แถวนี้ (หรือจะแตะที่ Kbn ก็ได้) ให้เด้งไปหน้า 5
         holder.itemView.setOnClickListener {
-            val intent = android.content.Intent(holder.itemView.context, Screen5Activity::class.java)
-
-            // แนบข้อมูลพาร์ทนี้ส่งไปโชว์อัตโนมัติในหน้า 5
+            val intent = Intent(holder.itemView.context, Screen5Activity::class.java)
             intent.putExtra("PART_NO", item.partNo)
             intent.putExtra("PART_NAME", item.partName)
             intent.putExtra("SUPPLIER", item.sup)
-
             holder.itemView.context.startActivity(intent)
         }
+    }
+
+    override fun getItemCount(): Int {
+        return dataList.size
     }
 }
