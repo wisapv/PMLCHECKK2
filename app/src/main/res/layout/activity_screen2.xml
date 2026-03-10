@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_main"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data Synchronization"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"/>
+
+        <Button
+            android:id="@+id/btnLoadList"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Load List from Cloud"
+            android:textColor="@color/text_primary"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_modern_card"
+            android:backgroundTint="@color/accent_purple"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/txtUpdated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="● Data Updated Successfully"
+            android:textColor="@color/status_green"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/txtSelectAction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Action"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/btnSelectAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_modern_card"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Address"
+                android:textColor="@color/accent_pink"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnFreeZone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_modern_card"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Free Zone"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
