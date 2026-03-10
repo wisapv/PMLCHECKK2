@@ -20,7 +20,7 @@ class Screen2Activity : AppCompatActivity() {
         setContentView(R.layout.activity_screen2)
 
         // 🚩 จุดที่แก้: ใช้ LinearLayout แทน Button เพื่อให้ไม่แครช
-        val btnLoadList = findViewById<LinearLayout>(R.id.btnLoadList)
+        val btnLoadList = findViewById<android.widget.Button>(R.id.btnLoadList)
         val btnSelectAddress = findViewById<LinearLayout>(R.id.btnSelectAddress)
         val txtUpdated = findViewById<TextView>(R.id.txtUpdated)
 

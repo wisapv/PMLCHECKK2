@@ -5,47 +5,85 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
-// 1. สร้างกล่องเก็บข้อมูลสำหรับ 1 แถวในตาราง
-data class PartData(val no: String, val supplier: String, val kbn: String, val address: String)
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class Screen4Activity : AppCompatActivity() {
+
+    private lateinit var db: AppDatabase
+    private lateinit var adapter: PartListAdapter
+
+    // ประกาศตัวแปรสำหรับ View ต่างๆ
+    private lateinit var txtHeaderAddress: TextView
+    private lateinit var txtRemainCount: TextView
+    private lateinit var recyclerViewPartList: RecyclerView
+    private lateinit var btnEdit: Button
+    private lateinit var btnNext: Button
+
+    private var myPartList = mutableListOf<InventoryItem>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen4)
 
-        // 2. รับชื่อ Address ที่เราจิ้มมาจากหน้า 3 (เช่น A01: Zone A) มาแสดงเป็นหัวข้อ
+        // --- ขั้นตอนสำคัญ: เชื่อม ID จาก XML เข้ากับตัวแปร Kotlin ---
+        txtHeaderAddress = findViewById(R.id.txtHeaderAddress)
+        txtRemainCount = findViewById(R.id.txtRemainCount)
+        recyclerViewPartList = findViewById(R.id.recyclerViewPartList)
+        btnEdit = findViewById(R.id.btnEdit)
+        btnNext = findViewById(R.id.btnNext)
+
+        // เริ่มต้น Database (ใช้ Singleton pattern ตามไฟล์ AppDatabase.kt ของคุณ)
+        db = AppDatabase.getDatabase(this)
+
+        // รับค่า Address ที่เลือกมาจากหน้า Screen 3
         val selectedAddress = intent.getStringExtra("SELECTED_ADDRESS") ?: "M01: PART LIST"
-        val txtHeaderAddress = findViewById<TextView>(R.id.txtHeaderAddress)
         txtHeaderAddress.text = selectedAddress
 
-        // 3. จำลองข้อมูล Part List ที่อยู่ในโซนนี้
-        val myPartList = arrayListOf(
-            PartData("1", "SAB1A", "A001", "A01"),
-            PartData("2", "SAB1A", "A001", "A01"),
-            PartData("3", "SAB1A", "A001", "A01"),
-            PartData("4", "SAB1A", "A001", "A01"),
-            PartData("5", "SAB1A", "A001", "A01")
-        )
+        // ตั้งค่า RecyclerView
+        recyclerViewPartList.layoutManager = LinearLayoutManager(this)
+        adapter = PartListAdapter(myPartList)
+        recyclerViewPartList.adapter = adapter
 
-        // 4. เอาจำนวน Part ไปแสดงที่เลข REMAIN ตัวใหญ่ๆ
-        val txtRemainCount = findViewById<TextView>(R.id.txtRemainCount)
-        txtRemainCount.text = myPartList.size.toString()
+        // โหลดข้อมูลจริงจาก Database
+        loadDataFromDatabase(selectedAddress)
 
-        // 5. ตั้งค่า RecyclerView ให้แสดงผลเป็นตาราง
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewPartList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = PartListAdapter(myPartList)
+        // ตั้งค่าปุ่ม (ถ้ามีฟังก์ชันเพิ่มในอนาคต)
+        btnEdit.setOnClickListener {
+            // โค้ดสำหรับปุ่ม Edit
+        }
+
+        btnNext.setOnClickListener {
+            // โค้ดสำหรับปุ่ม Next
+        }
+    }
+
+    private fun loadDataFromDatabase(groupName: String) {
+        lifecycleScope.launch {
+            val items = withContext(Dispatchers.IO) {
+                // ดึงข้อมูลตามกลุ่ม Address ที่เลือก
+                db.inventoryDao().getItemsByGroup(groupName)
+            }
+
+            myPartList.clear()
+            myPartList.addAll(items)
+
+            // อัปเดตตัวเลข REMAIN ตามจำนวนที่นับได้จาก Database จริง
+            txtRemainCount.text = myPartList.size.toString()
+
+            adapter.notifyDataSetChanged()
+        }
     }
 }
 
-// ------------------------------------------------------------------------
-// 6. ส่วนของ Adapter (โรงงานปั๊มแถวตาราง)
-// ------------------------------------------------------------------------
-class PartListAdapter(private val dataList: ArrayList<PartData>) :
+// --- Adapter สำหรับจัดการรายการในตาราง ---
+class PartListAdapter(private val dataList: List<InventoryItem>) :
     RecyclerView.Adapter<PartListAdapter.MyViewHolder>() {
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -60,16 +98,14 @@ class PartListAdapter(private val dataList: ArrayList<PartData>) :
         return MyViewHolder(view)
     }
 
-    override fun getItemCount(): Int {
-        return dataList.size
-    }
+    override fun getItemCount(): Int = dataList.size
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val item = dataList[position]
-        // เอาข้อมูลไปหยอดลงแต่ละคอลัมน์
-        holder.txtNo.text = item.no
-        holder.txtSupplier.text = item.supplier
-        holder.txtKbn.text = item.kbn
-        holder.txtAddress.text = item.address
+
+        holder.txtNo.text = (position + 1).toString()
+        holder.txtSupplier.text = item.sup ?: "-"     // ใช้ฟิลด์ 'sup' จาก InventoryItem.kt
+        holder.txtKbn.text = item.kbn ?: "-"         // ใช้ฟิลด์ 'kbn' จาก InventoryItem.kt
+        holder.txtAddress.text = item.fullAddr       // ใช้ฟิลด์ 'fullAddr' จาก InventoryItem.kt
     }
 }
