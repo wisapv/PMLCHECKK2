@@ -3,6 +3,7 @@ package com.example.pmlcheckk
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -19,10 +20,13 @@ class Screen2Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen2)
 
-        // 🚩 จุดที่แก้: ใช้ LinearLayout แทน Button เพื่อให้ไม่แครช
-        val btnLoadList = findViewById<android.widget.Button>(R.id.btnLoadList)
+        val btnLoadList = findViewById<Button>(R.id.btnLoadList)
         val btnSelectAddress = findViewById<LinearLayout>(R.id.btnSelectAddress)
         val txtUpdated = findViewById<TextView>(R.id.txtUpdated)
+
+        // ✅ 1. เพิ่มการผูกตัวแปรสำหรับปุ่ม Free Zone และข้อความ Select Action จาก XML
+        val btnFreeZone = findViewById<LinearLayout>(R.id.btnFreeZone)
+        val txtSelectAction = findViewById<TextView>(R.id.txtSelectAction)
 
         val db = Room.databaseBuilder(
             applicationContext,
@@ -45,11 +49,16 @@ class Screen2Activity : AppCompatActivity() {
                     }
                     db.inventoryDao().insertAll(processedData)
 
-                    // 🚩 3. Logic UI เดิมที่พี่ต้องการ:
+                    // 3. Logic UI
                     withContext(Dispatchers.Main) {
-                        btnLoadList.visibility = View.GONE     // ปุ่มโหลดหายไป
-                        txtUpdated.visibility = View.VISIBLE   // คำว่า Updated โผล่มา
-                        btnSelectAddress.visibility = View.VISIBLE // ปุ่มไปต่อโผล่มา
+                        btnLoadList.visibility = View.GONE     // ซ่อนปุ่มโหลด
+                        txtUpdated.visibility = View.VISIBLE   // แสดงคำว่า Updated Successfully
+
+                        // ✅ 2. แสดงข้อความหัวข้อและปุ่มทั้ง 2 ปุ่มขึ้นมาพร้อมกัน
+                        txtSelectAction.visibility = View.VISIBLE
+                        btnSelectAddress.visibility = View.VISIBLE
+                        btnFreeZone.visibility = View.VISIBLE
+
                         Toast.makeText(this@Screen2Activity, "Updated Successfully!", Toast.LENGTH_SHORT).show()
                     }
 
@@ -61,9 +70,18 @@ class Screen2Activity : AppCompatActivity() {
             }
         }
 
+        // เมื่อกดปุ่ม Select Address ให้ไปหน้า Screen3
         btnSelectAddress.setOnClickListener {
             val intent = Intent(this, Screen3Activity::class.java)
             startActivity(intent)
+        }
+
+        // ✅ 3. เตรียม Listener สำหรับปุ่ม Free Zone (เปลี่ยนหน้าหรือทำคำสั่งอื่นๆ ใส่เพิ่มได้เลย)
+        btnFreeZone.setOnClickListener {
+            Toast.makeText(this, "Free Zone Selected", Toast.LENGTH_SHORT).show()
+            // ตัวอย่าง: ถ้ามีหน้าสำหรับ Free Zone สามารถสั่ง intent ไปได้เลยเหมือนข้างบน
+            // val intent = Intent(this, ScreenFreeZoneActivity::class.java)
+            // startActivity(intent)
         }
     }
 }

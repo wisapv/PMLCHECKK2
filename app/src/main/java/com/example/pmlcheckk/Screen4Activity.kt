@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room // ✅ เพิ่ม import เพื่อให้มองเห็น Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,7 +20,6 @@ class Screen4Activity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var adapter: PartListAdapter
 
-    // ประกาศตัวแปรสำหรับ View ต่างๆ
     private lateinit var txtHeaderAddress: TextView
     private lateinit var txtRemainCount: TextView
     private lateinit var recyclerViewPartList: RecyclerView
@@ -32,57 +32,44 @@ class Screen4Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen4)
 
-        // --- ขั้นตอนสำคัญ: เชื่อม ID จาก XML เข้ากับตัวแปร Kotlin ---
         txtHeaderAddress = findViewById(R.id.txtHeaderAddress)
         txtRemainCount = findViewById(R.id.txtRemainCount)
         recyclerViewPartList = findViewById(R.id.recyclerViewPartList)
         btnEdit = findViewById(R.id.btnEdit)
         btnNext = findViewById(R.id.btnNext)
 
-        // เริ่มต้น Database (ใช้ Singleton pattern ตามไฟล์ AppDatabase.kt ของคุณ)
-        db = AppDatabase.getDatabase(this)
+        // ✅ แก้ไขเป็นคำสั่งสร้าง Database ที่ถูกต้อง
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "pml_db"
+        ).build()
 
-        // รับค่า Address ที่เลือกมาจากหน้า Screen 3
         val selectedAddress = intent.getStringExtra("SELECTED_ADDRESS") ?: "M01: PART LIST"
         txtHeaderAddress.text = selectedAddress
 
-        // ตั้งค่า RecyclerView
         recyclerViewPartList.layoutManager = LinearLayoutManager(this)
         adapter = PartListAdapter(myPartList)
         recyclerViewPartList.adapter = adapter
 
-        // โหลดข้อมูลจริงจาก Database
         loadDataFromDatabase(selectedAddress)
 
-        // ตั้งค่าปุ่ม (ถ้ามีฟังก์ชันเพิ่มในอนาคต)
-        btnEdit.setOnClickListener {
-            // โค้ดสำหรับปุ่ม Edit
-        }
-
-        btnNext.setOnClickListener {
-            // โค้ดสำหรับปุ่ม Next
-        }
+        btnEdit.setOnClickListener { }
+        btnNext.setOnClickListener { }
     }
 
     private fun loadDataFromDatabase(groupName: String) {
         lifecycleScope.launch {
             val items = withContext(Dispatchers.IO) {
-                // ดึงข้อมูลตามกลุ่ม Address ที่เลือก
                 db.inventoryDao().getItemsByGroup(groupName)
             }
-
             myPartList.clear()
             myPartList.addAll(items)
-
-            // อัปเดตตัวเลข REMAIN ตามจำนวนที่นับได้จาก Database จริง
             txtRemainCount.text = myPartList.size.toString()
-
             adapter.notifyDataSetChanged()
         }
     }
 }
 
-// --- Adapter สำหรับจัดการรายการในตาราง ---
 class PartListAdapter(private val dataList: List<InventoryItem>) :
     RecyclerView.Adapter<PartListAdapter.MyViewHolder>() {
 
@@ -98,14 +85,24 @@ class PartListAdapter(private val dataList: List<InventoryItem>) :
         return MyViewHolder(view)
     }
 
-    override fun getItemCount(): Int = dataList.size
-
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val item = dataList[position]
 
         holder.txtNo.text = (position + 1).toString()
-        holder.txtSupplier.text = item.sup ?: "-"     // ใช้ฟิลด์ 'sup' จาก InventoryItem.kt
-        holder.txtKbn.text = item.kbn ?: "-"         // ใช้ฟิลด์ 'kbn' จาก InventoryItem.kt
-        holder.txtAddress.text = item.fullAddr       // ใช้ฟิลด์ 'fullAddr' จาก InventoryItem.kt
+        holder.txtSupplier.text = item.sup ?: "-"
+        holder.txtKbn.text = item.kbn ?: "-"
+        holder.txtAddress.text = item.fullAddr
+
+        // ✅ เพิ่มคำสั่งเมื่อกดคลิกที่แถวนี้ (หรือจะแตะที่ Kbn ก็ได้) ให้เด้งไปหน้า 5
+        holder.itemView.setOnClickListener {
+            val intent = android.content.Intent(holder.itemView.context, Screen5Activity::class.java)
+
+            // แนบข้อมูลพาร์ทนี้ส่งไปโชว์อัตโนมัติในหน้า 5
+            intent.putExtra("PART_NO", item.partNo)
+            intent.putExtra("PART_NAME", item.partName)
+            intent.putExtra("SUPPLIER", item.sup)
+
+            holder.itemView.context.startActivity(intent)
+        }
     }
 }

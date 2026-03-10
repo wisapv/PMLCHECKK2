@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_main"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SCAN PART"
+        android:textColor="@color/text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_modern_card"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp">
+
+        <TextView android:id="@+id/txtPartNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/accent_pink" android:textSize="20sp" android:textStyle="bold" android:text="Part No: -"/>
+        <TextView android:id="@+id/txtPartName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:layout_marginTop="8dp" android:textSize="16sp" android:text="Name: -"/>
+        <TextView android:id="@+id/txtSupplier" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_secondary" android:layout_marginTop="4dp" android:text="Supplier: -"/>
+    </LinearLayout>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Box *" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
+    <EditText android:id="@+id/edtBox" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="12dp" android:inputType="text" android:hint="Enter Box" android:textColorHint="@color/text_secondary"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pcs *" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
+    <EditText android:id="@+id/edtPcs" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="12dp" android:inputType="number" android:hint="Enter Pcs" android:textColorHint="@color/text_secondary"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seq *" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
+    <EditText android:id="@+id/edtSeq" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="12dp" android:inputType="text" android:hint="Enter Seq" android:textColorHint="@color/text_secondary"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Order (Optional)" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
+    <EditText android:id="@+id/edtOrder" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="24dp" android:inputType="text" android:hint="Enter Order (if any)" android:textColorHint="@color/text_secondary"/>
+
+    <Button android:id="@+id/btnSave" android:layout_width="match_parent" android:layout_height="60dp" android:text="SAVE" android:backgroundTint="@color/accent_purple" android:textColor="@color/text_primary" android:textSize="18sp" android:textStyle="bold"/>
+</LinearLayout>
