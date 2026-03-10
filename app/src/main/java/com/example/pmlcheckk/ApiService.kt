@@ -2,9 +2,8 @@ package com.example.pmlcheckk
 
 import retrofit2.http.GET
 
-// ในไฟล์ ApiService.kt
 interface ApiService {
-    @GET(":u:/t/HOTCALLOVERFLOW/IQBSqpVjv-sfTJegqaHXFAtGAQKF1BNfraUbVZYARBuESwQ?download=1")
+    // 🚩 เอารหัส 7c6a22758c17b1961b97 มาใส่ตรงนี้ครับ
+    @GET("7c6a22758c17b1961b97")
     suspend fun getInventoryList(): List<InventoryItem>
 }
-

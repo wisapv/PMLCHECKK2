@@ -2,22 +2,26 @@ package com.example.pmlcheckk
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "inventory_table")
 data class InventoryItem(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val Dock: String,
-    val Sup: String,
-    val Splant: String,
-    val Sdock: String, // จากคอลัมน์ Sup ใน Excel
-    val PartNo: String,       // จากคอลัมน์ PART NO
-    val PartName: String,     // จากคอลัมน์ PartName
-    val Kbn: String,          // จากคอลัมน์ Kbn
-    val Qty: Int,             // จากคอลัมน์ Q'ty
-    val fullAddr: String,     // จากคอลัมน์ Addr
-    val addrGroup: String = "", // ตัวนี้แอปจะสร้างให้เองจาก 3 ตัวแรกของ Addr
-    val Box: Int,
-    val Pcs: Int,
-    val Seq: Int,
-    val LastOrder: Int,
+
+    @SerializedName("No") val no: Int? = 0,
+    @SerializedName("Dock") val dock: String? = "",
+    @SerializedName("Sup") val sup: String? = "",
+    @SerializedName("Splant") val splant: String? = "",
+    @SerializedName("Sdock") val sdock: String? = "",
+    @SerializedName("PartNo") val partNo: String? = "",
+    @SerializedName("PartName") val partName: String? = "",
+    @SerializedName("Kbn") val kbn: String? = "",
+    @SerializedName("Qty") val qty: Int? = 0,
+    @SerializedName("fullAddr") val fullAddr: String = "",
+    @SerializedName("Box") val box: String? = "",
+    @SerializedName("Pcs") val pcs: String? = "",
+    @SerializedName("Seq") val seq: String? = "",
+    @SerializedName("LastOrder") val lastOrder: String? = "",
+
+    val addrGroup: String = "" // เอาไว้เก็บชื่อ 3 ตัวหน้าที่แอปเราหั่นเอง
 )

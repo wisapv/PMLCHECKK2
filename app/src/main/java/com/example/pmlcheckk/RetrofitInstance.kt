@@ -4,8 +4,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    // 🚩 เปลี่ยน "https://your-onedrive-base-url.com/" เป็น URL หลักของ OneDrive คุณ
-    private const val BASE_URL = "https://toyotaasia.sharepoint.com/"
+    // 🚩 เปลี่ยนเป็นโดเมนหลัก (ต้องมีเครื่องหมาย / ปิดท้ายเสมอ)
+    private const val BASE_URL = "https://api.npoint.io/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()
