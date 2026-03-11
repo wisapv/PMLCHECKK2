@@ -77,8 +77,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end"
         android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Back"
+            android:textColor="@color/text_primary"
+            android:backgroundTint="#3D3A55" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <Button
             android:id="@+id/btnEdit"
@@ -86,8 +98,8 @@
             android:layout_height="50dp"
             android:text="Edit"
             android:textColor="@color/text_primary"
-            android:backgroundTint="#3D3A55"
-            android:layout_marginEnd="16dp"/>
+            android:backgroundTint="#FF9800"
+            android:layout_marginEnd="16dp" />
 
         <Button
             android:id="@+id/btnNext"

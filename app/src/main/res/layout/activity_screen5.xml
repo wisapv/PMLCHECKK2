@@ -277,7 +277,7 @@
                     android:orientation="vertical"
                     android:layout_marginEnd="8dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seq *" android:textColor="@color/text_primary" android:layout_marginBottom="4dp"/>
-                    <EditText android:id="@+id/edtSeq" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:backgroundTint="#FFB3C6" android:textColor="#000000" android:paddingHorizontal="16dp" android:inputType="number" android:hint="Enter Seq" android:textColorHint="#66000000"/>
+                    <EditText android:id="@+id/edtSeq" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:backgroundTint="#FFB3C6" android:textColor="#000000" android:paddingHorizontal="16dp" android:inputType="number" android:hint="Enter Seq" android:textColorHint="#66000000" android:maxLength="3" />
                 </LinearLayout>
 
                 <LinearLayout

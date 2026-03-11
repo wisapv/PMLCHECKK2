@@ -8,13 +8,27 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class Screen5Activity : AppCompatActivity() {
+
+    private lateinit var db: AppDatabase // เพิ่มตัวแปร Database
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen5)
 
-        // ผูกตัวแปร Text
+        // สร้าง Instance ของ Database
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "pml_db"
+        ).build()
+
+        // ผูกตัวแปร Text และ Input
         val txtSupplier = findViewById<TextView>(R.id.txtSupplier)
         val txtPartNo = findViewById<TextView>(R.id.txtPartNo)
         val txtPartName = findViewById<TextView>(R.id.txtPartName)
@@ -22,7 +36,6 @@ class Screen5Activity : AppCompatActivity() {
         val txtFullAddr = findViewById<TextView>(R.id.txtFullAddr)
         val txtQty = findViewById<TextView>(R.id.txtQty)
 
-        // ผูกตัวแปร Input และ Button
         val edtBox = findViewById<EditText>(R.id.edtBox)
         val edtPcs = findViewById<EditText>(R.id.edtPcs)
         val edtSeq = findViewById<EditText>(R.id.edtSeq)
@@ -32,14 +45,17 @@ class Screen5Activity : AppCompatActivity() {
         val btnBack = findViewById<Button>(R.id.btnBack)
         val btnSave = findViewById<Button>(R.id.btnSave)
 
-        // รับข้อมูลจาก Intent
+        // รับข้อมูลจาก Intent (รับ ITEM_ID มาด้วยเพื่อใช้อ้างอิงตอนอัปเดต)
+        val itemId = intent.getIntExtra("ITEM_ID", -1)
         val supplier = intent.getStringExtra("SUPPLIER") ?: "-"
         val partNo = intent.getStringExtra("PART_NO") ?: "-"
         val partName = intent.getStringExtra("PART_NAME") ?: "-"
         val kbn = intent.getStringExtra("KBN") ?: "-"
         val fullAddr = intent.getStringExtra("FULL_ADDR") ?: "-"
         val qty = intent.getIntExtra("QTY", 0)
-
+        val savedBox = intent.getStringExtra("BOX") ?: ""
+        val savedPcs = intent.getStringExtra("PCS") ?: ""
+        val savedSeq = intent.getStringExtra("SEQ") ?: ""
         // โชว์ข้อมูล
         txtSupplier.text = supplier
         txtPartNo.text = partNo
@@ -48,39 +64,62 @@ class Screen5Activity : AppCompatActivity() {
         txtFullAddr.text = fullAddr
         txtQty.text = qty.toString()
 
-        // 1. กดปุ่ม Not Found -> เติม 0 อัตโนมัติ
+        edtBox.setText(savedBox)
+        edtPcs.setText(savedPcs)
+        edtSeq.setText(savedSeq)
+
         btnNotFound.setOnClickListener {
             edtBox.setText("0")
             edtPcs.setText("0")
-            edtSeq.setText("0")
             edtOrder.setText("0")
+
         }
 
-        // 2. กดปุ่ม Back -> กลับไปหน้า 4 แบบไม่มีอะไรเกิดขึ้น
         btnBack.setOnClickListener {
             finish()
         }
 
-        // 3. กดปุ่ม Save -> เซฟแล้วส่งค่ายืนยันกลับไปหน้า 4
+        // กดปุ่ม Save -> บันทึกลง Room Database
         btnSave.setOnClickListener {
             val box = edtBox.text.toString().trim()
             val pcs = edtPcs.text.toString().trim()
             val seq = edtSeq.text.toString().trim()
 
+            // 1. เช็คว่ากรอกครบทุกช่องไหม
             if (box.isEmpty() || pcs.isEmpty() || seq.isEmpty()) {
                 Toast.makeText(this, "กรุณากรอก Box, Pcs และ Seq ให้ครบ", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // TODO: โค้ดบันทึกลง Database (Room) จะใส่ตรงนี้ในอนาคต
+            // ==========================================
+            // 2. เพิ่มเงื่อนไขเช็คว่า Seq ต้องมี 3 หลักเท่านั้น
+            // ==========================================
+            if (seq.length != 3) {
+                Toast.makeText(this, "กรุณากรอก Seq ให้ครบ 3 หลัก (เช่น 001)", Toast.LENGTH_SHORT)
+                    .show()
+                // ให้เด้งไปโฟกัสที่ช่อง Seq เพื่อให้ผู้ใช้พิมพ์แก้ได้เลย
+                edtSeq.requestFocus()
+                return@setOnClickListener
+            }
 
-            // สร้าง Intent ส่ง Part No ที่เพิ่งเซฟเสร็จกลับไปบอก Screen 4
-            val resultIntent = Intent()
-            resultIntent.putExtra("SAVED_PART_NO", partNo)
-            setResult(Activity.RESULT_OK, resultIntent)
+            // 3. ถ้าผ่านเงื่อนไขทั้งหมด ค่อยบันทึกข้อมูล
+            if (itemId != -1) {
+                // บันทึกข้อมูลแบบ Asynchronous ด้วย Coroutine
+                lifecycleScope.launch(Dispatchers.IO) {
+                    db.inventoryDao().updateStockData(itemId, box, pcs, seq)
 
-            Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show()
-            finish() // เด้งกลับไปหน้า 4
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@Screen5Activity, "Saved!", Toast.LENGTH_SHORT).show()
+
+                        // ส่งสัญญาณบอกหน้า 4 ว่าเซฟสำเร็จแล้ว
+                        val resultIntent = Intent()
+                        setResult(Activity.RESULT_OK, resultIntent)
+                        finish()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "ไม่พบ ID ของสินค้านี้", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
