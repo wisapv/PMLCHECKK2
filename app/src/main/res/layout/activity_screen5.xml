@@ -14,32 +14,337 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="26dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:layout_marginBottom="2dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="Sup"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtSupplier"
+                        android:layout_width="match_parent"
+                        android:layout_height="39dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#673AB7"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:text="-"
+                        android:textColor="#FFFF"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="2"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="PartNo"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtPartNo"
+                        android:layout_width="match_parent"
+                        android:layout_height="39dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#673AB7"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:text="-"
+                        android:textColor="#FFFF"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="66dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="PartName"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/txtPartName"
+                    android:layout_width="match_parent"
+                    android:layout_height="39dp"
+                    android:background="@drawable/bg_modern_card"
+                    android:backgroundTint="#673AB7"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="-"
+                    android:textColor="#FFFF"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginBottom="45dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="KBN"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtKbn"
+                        android:layout_width="match_parent"
+                        android:layout_height="39dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#673AB7"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp"
+                        android:text="-"
+                        android:textColor="#FFFF"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="Full Address"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtFullAddr"
+                        android:layout_width="match_parent"
+                        android:layout_height="39dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#673AB7"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp"
+                        android:text="-"
+                        android:textColor="#FFFF"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="Qty"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/txtQty"
+                        android:layout_width="match_parent"
+                        android:layout_height="39dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#673AB7"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp"
+                        android:text="-"
+                        android:textColor="#FFFF"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp"
+                        android:text="Box *"
+                        android:textColor="@color/text_primary" />
+
+                    <EditText
+                        android:id="@+id/edtBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#FFB3C6"
+                        android:hint="Enter Box"
+                        android:inputType="number"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#66000000" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="Pcs *"
+                        android:textColor="@color/text_primary" />
+
+                    <EditText
+                        android:id="@+id/edtPcs"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_modern_card"
+                        android:backgroundTint="#FFB3C6"
+                        android:hint="Enter Pcs"
+                        android:inputType="number"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#66000000" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seq *" android:textColor="@color/text_primary" android:layout_marginBottom="4dp"/>
+                    <EditText android:id="@+id/edtSeq" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:backgroundTint="#FFB3C6" android:textColor="#000000" android:paddingHorizontal="16dp" android:inputType="number" android:hint="Enter Seq" android:textColorHint="#66000000"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Order (Optional)" android:textColor="@color/text_primary" android:layout_marginBottom="4dp"/>
+                    <EditText android:id="@+id/edtOrder" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:backgroundTint="#E0E0E0" android:textColor="#000000" android:paddingHorizontal="16dp" android:inputType="text" android:hint="Optional" android:textColorHint="#66000000"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/bg_modern_card"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp">
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="bottom">
 
-        <TextView android:id="@+id/txtPartNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/accent_pink" android:textSize="20sp" android:textStyle="bold" android:text="Part No: -"/>
-        <TextView android:id="@+id/txtPartName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:layout_marginTop="8dp" android:textSize="16sp" android:text="Name: -"/>
-        <TextView android:id="@+id/txtSupplier" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_secondary" android:layout_marginTop="4dp" android:text="Supplier: -"/>
+        <Button
+            android:id="@+id/btnNotFound"
+            android:layout_width="110dp"
+            android:layout_height="50dp"
+            android:text="Not Found"
+
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:backgroundTint="#FF5252"
+            android:textStyle="bold"/>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#9E9E9E"
+                android:text="Back"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:text="Save"
+                android:backgroundTint="#4CAF50"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
     </LinearLayout>
 
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Box *" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
-    <EditText android:id="@+id/edtBox" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="12dp" android:inputType="text" android:hint="Enter Box" android:textColorHint="@color/text_secondary"/>
-
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pcs *" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
-    <EditText android:id="@+id/edtPcs" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="12dp" android:inputType="number" android:hint="Enter Pcs" android:textColorHint="@color/text_secondary"/>
-
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seq *" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
-    <EditText android:id="@+id/edtSeq" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="12dp" android:inputType="text" android:hint="Enter Seq" android:textColorHint="@color/text_secondary"/>
-
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Order (Optional)" android:textColor="@color/text_secondary" android:layout_marginBottom="4dp"/>
-    <EditText android:id="@+id/edtOrder" android:layout_width="match_parent" android:layout_height="50dp" android:background="@drawable/bg_modern_card" android:textColor="@color/text_primary" android:paddingHorizontal="16dp" android:layout_marginBottom="24dp" android:inputType="text" android:hint="Enter Order (if any)" android:textColorHint="@color/text_secondary"/>
-
-    <Button android:id="@+id/btnSave" android:layout_width="match_parent" android:layout_height="60dp" android:text="SAVE" android:backgroundTint="@color/accent_purple" android:textColor="@color/text_primary" android:textSize="18sp" android:textStyle="bold"/>
 </LinearLayout>

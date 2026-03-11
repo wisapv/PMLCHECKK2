@@ -95,9 +95,16 @@ class PartListAdapter(private val dataList: List<InventoryItem>) :
 
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, Screen5Activity::class.java)
+            // ส่งข้อมูลเดิม
             intent.putExtra("PART_NO", item.partNo)
             intent.putExtra("PART_NAME", item.partName)
             intent.putExtra("SUPPLIER", item.sup)
+
+            // --- เพิ่ม 3 บรรทัดนี้เข้าไปใหม่ ---
+            intent.putExtra("KBN", item.kbn)
+            intent.putExtra("FULL_ADDR", item.fullAddr)
+            intent.putExtra("QTY", item.qty ?: 0)
+
             holder.itemView.context.startActivity(intent)
         }
     }
