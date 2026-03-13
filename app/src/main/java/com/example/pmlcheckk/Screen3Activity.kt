@@ -22,32 +22,58 @@ import kotlinx.coroutines.withContext
 data class AddressData(val addressName: String, var isCompleted: Boolean)
 
 class Screen3Activity : AppCompatActivity() {
+
+    private lateinit var db: AppDatabase
+    private lateinit var recyclerView: RecyclerView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen3)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewAddress)
+        recyclerView = findViewById(R.id.recyclerViewAddress)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // 1. เชื่อมต่อ Database
-        val db = Room.databaseBuilder(
+        db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "pml_db"
         ).build()
 
-        // 2. ดึงข้อมูลกลุ่ม Address จาก Database มาแสดง
+        val btnBack = findViewById<android.widget.Button>(R.id.btnBack)
+        btnBack.setOnClickListener {
+            finish() // ปิดหน้า 3 เพื่อกลับไปหน้า 2
+        }
+    }
+
+    // ========================================================
+    // ย้ายการโหลดข้อมูลมาไว้ใน onResume
+    // เพื่อให้มันอัปเดตสีปุ่มใหม่ "ทุกครั้ง" ที่กลับมาจากหน้า 4
+    // ========================================================
+    override fun onResume() {
+        super.onResume()
+        loadAddressGroups()
+    }
+
+    private fun loadAddressGroups() {
         lifecycleScope.launch(Dispatchers.IO) {
-            // ไปดึงชื่อกลุ่ม (เช่น BP1, CH1) ที่เราตั้งให้มันตัดคำไว้ในหน้า 2 มาครับ
+            // ไปดึงชื่อกลุ่ม (เช่น BP1, CH1)
             val groups = db.inventoryDao().getAllAddrGroups()
 
-            withContext(Dispatchers.Main) {
-                // แปลงข้อมูลมาใส่กล่อง เพื่อเตรียมส่งให้โรงงานปั๊มปุ่ม
-                val myAddressList = ArrayList<AddressData>()
-                for (groupName in groups) {
-                    // สถานะเริ่มต้นคือยังเช็กไม่เสร็จ (false)
-                    myAddressList.add(AddressData(groupName, false))
-                }
+            val myAddressList = ArrayList<AddressData>()
 
+            for (groupName in groups) {
+                // ดึงรายการทั้งหมดที่อยู่ในกลุ่ม Address นีัมา
+                val itemsInGroup = db.inventoryDao().getItemsByGroup(groupName)
+
+                // เช็คว่ารายการทั้งหมดนี้มีข้อมูล Box ครบทุกตัวแล้วใช่หรือไม่ (Remain = 0)
+                // itemsInGroup.all { ... } หมายถึง ทุกตัวต้องตรงตามเงื่อนไข
+                val isCompleted = itemsInGroup.isNotEmpty() && itemsInGroup.all { !it.box.isNullOrEmpty() }
+
+                // นำข้อมูลแพ็คใส่กล่อง ถ้าครบแล้ว isCompleted จะเป็น true
+                myAddressList.add(AddressData(groupName, isCompleted))
+            }
+
+            withContext(Dispatchers.Main) {
                 // สั่งให้โรงงานประกอบปุ่มออกมาโชว์บนหน้าจอ
                 val adapter = AddressAdapter(myAddressList)
                 recyclerView.adapter = adapter
