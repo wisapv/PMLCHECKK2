@@ -7,6 +7,7 @@ import androidx.room.Query
 
 @Dao
 interface InventoryDao {
+
     @Query("DELETE FROM inventory_table")
     suspend fun clearAll(): Int
 
@@ -19,11 +20,19 @@ interface InventoryDao {
     @Query("SELECT * FROM inventory_table WHERE addrGroup = :groupName")
     suspend fun getItemsByGroup(groupName: String): List<InventoryItem>
 
-    // --- เพิ่มคำสั่งนี้เข้าไปใหม่เพื่อใช้บันทึก (อัปเดต) ข้อมูล Box, Pcs, Seq ---
-    @Query("UPDATE inventory_table SET Box = :box, Pcs = :pcs, Seq = :seq WHERE id = :id")
-    suspend fun updateStockData(id: Int, box: String, pcs: String, seq: String)
+    // 🚨 อัปเดตเพิ่ม lastOrder เข้าไปในคำสั่งนี้ให้ตรงกับตัวแปรคุณ
+    @Query("UPDATE inventory_table SET Box = :box, Pcs = :pcs, Seq = :seq, lastOrder = :lastOrder WHERE id = :id")
+    suspend fun updateStockData(id: Int, box: String, pcs: String, seq: String, lastOrder: String)
 
-    // เพิ่มคำสั่งนี้นับจำนวนรายการที่กรอก Box แล้ว
     @Query("SELECT COUNT(*) FROM inventory_table WHERE Box IS NOT NULL AND Box != ''")
     suspend fun getCompletedItemsCount(): Int
+
+    // ==========================================
+    // คำสั่งสำหรับโหมด Free Zone
+    // ==========================================
+    @Query("SELECT * FROM inventory_table WHERE kbn = :kbn LIMIT 1")
+    suspend fun getItemByKbn(kbn: String): InventoryItem?
+
+    @Query("UPDATE inventory_table SET Box = :box, addrGroup = :zone, fullAddr = :zone WHERE kbn = :kbn")
+    suspend fun updateFreeZoneData(kbn: String, box: String, zone: String)
 }

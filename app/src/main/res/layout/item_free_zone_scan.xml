@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="horizontal" android:background="@drawable/bg_modern_card" android:backgroundTint="#2C2940" android:padding="12dp" android:layout_marginBottom="8dp" android:gravity="center_vertical">
+    <TextView android:id="@+id/txtItemNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_secondary" android:textStyle="bold" android:layout_marginEnd="12dp"/>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+        <TextView android:id="@+id/txtScanKbn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="18sp" android:textStyle="bold"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@drawable/bg_modern_card" android:backgroundTint="#3D3A55" android:paddingHorizontal="12dp" android:paddingVertical="6dp" android:layout_marginEnd="8dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Box: " android:textColor="@color/text_secondary" />
+        <TextView android:id="@+id/txtScanBoxCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/accent_pink" android:textStyle="bold" android:textSize="16sp"/>
+    </LinearLayout>
+    <TextView android:id="@+id/btnDeleteScan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✕" android:textColor="#FF5252" android:textSize="20sp" android:textStyle="bold" android:padding="8dp"/>
+</LinearLayout>

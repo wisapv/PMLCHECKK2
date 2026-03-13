@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_main"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FREE ZONE: SCANNING"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location / Zone"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="8dp"/>
+    <EditText
+        android:id="@+id/edtScanLocation"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_modern_card"
+        android:backgroundTint="#3D3A55"
+        android:textColor="@color/accent_pink"
+        android:textStyle="bold"
+        android:paddingHorizontal="16dp"
+        android:enabled="false"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/edtBarcodeScanner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_modern_card"
+        android:backgroundTint="#FFFFFF"
+        android:hint="Shoot Barcode Here..."
+        android:inputType="text"
+        android:maxLines="1"
+        android:imeOptions="actionDone"
+        android:paddingHorizontal="16dp"
+        android:textColor="#000000"
+        android:layout_marginBottom="16dp">
+        <requestFocus /> </EditText>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="bottom"
+        android:layout_marginBottom="8dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Scanned Items:" android:textColor="@color/text_secondary" android:textSize="16sp"/>
+        <TextView android:id="@+id/txtTotalScan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" 0" android:textColor="@color/accent_pink" android:textSize="20sp" android:textStyle="bold"/>
+    </LinearLayout>
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#3D3A55" android:layout_marginBottom="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewScannedItems"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:text="Back"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#9E9E9E"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnSaveAll"
+            android:layout_width="251dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:backgroundTint="#4CAF50"
+            android:text="SAVE ALL"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

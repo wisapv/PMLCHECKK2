@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_main"
+    android:padding="24dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FREE ZONE SUMMARY"
+        android:textColor="@color/text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Zone *"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp"/>
+
+        <RelativeLayout
+            android:id="@+id/btnSelectZone"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_modern_card"
+            android:backgroundTint="#673AB7"
+            android:paddingHorizontal="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/txtSelectedZone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="S-lane"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="▼"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingHorizontal="8dp">
+
+        <TextView
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="No" android:textColor="@color/text_secondary" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2.5" android:text="Supplier" android:textColor="@color/text_secondary" android:textStyle="bold"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2.5" android:text="KBN" android:textColor="@color/text_secondary" android:textStyle="bold" android:gravity="center"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:text="Total Box" android:textColor="@color/text_secondary" android:textStyle="bold" android:gravity="end"/>
+    </LinearLayout>
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#3D3A55" android:layout_marginBottom="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/recyclerViewFreeZoneSummary" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false" android:paddingBottom="16dp"/>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <Button android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="50dp" android:text="Back" android:textColor="@color/text_primary" android:backgroundTint="#3D3A55" />
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+        <Button android:id="@+id/btnStartScan" android:layout_width="wrap_content" android:layout_height="50dp" android:text="Start Scan" android:textColor="@color/text_primary" android:backgroundTint="@color/accent_purple"/>
+    </LinearLayout>
+</LinearLayout>

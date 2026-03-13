@@ -1,12 +1,12 @@
 package com.example.pmlcheckk
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
@@ -16,110 +16,145 @@ import kotlinx.coroutines.withContext
 
 class Screen5Activity : AppCompatActivity() {
 
-    private lateinit var db: AppDatabase // เพิ่มตัวแปร Database
+    private lateinit var db: AppDatabase
+    private var itemId: Int = -1
+
+    // ตัวแปรเก็บข้อความจากเครื่องสแกนเนอร์
+    private var barcodeBuffer = StringBuilder()
+
+    private lateinit var txtKbn: TextView
+    private lateinit var txtFullAddress: TextView
+    private lateinit var edtBox: EditText
+    private lateinit var edtOrder: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_screen5)
 
-        // สร้าง Instance ของ Database
-        db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "pml_db"
-        ).build()
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pml_db").build()
 
-        // ผูกตัวแปร Text และ Input
-        val txtSupplier = findViewById<TextView>(R.id.txtSupplier)
-        val txtPartNo = findViewById<TextView>(R.id.txtPartNo)
+        // รับค่าข้อมูลที่ส่งมาจากหน้า 4
+        itemId = intent.getIntExtra("ITEM_ID", -1)
+        val kbn = intent.getStringExtra("ITEM_KBN") ?: ""
+        val fullAddr = intent.getStringExtra("ITEM_ADDR") ?: ""
+        val partName = intent.getStringExtra("ITEM_PARTNAME") ?: ""
+        val box = intent.getStringExtra("ITEM_BOX") ?: ""
+        val pcs = intent.getStringExtra("ITEM_PCS") ?: ""
+        val seq = intent.getStringExtra("ITEM_SEQ") ?: ""
+        val lastOrder = intent.getStringExtra("ITEM_LASTORDER") ?: "" // รับค่า lastOrder เดิมมาแสดง
+
+        // ผูกตัวแปร View ให้ตรงกับ ID ในไฟล์ XML
+        txtKbn = findViewById<TextView>(R.id.txtKbn)
+        txtFullAddress = findViewById<TextView>(R.id.txtFullAddr)
         val txtPartName = findViewById<TextView>(R.id.txtPartName)
-        val txtKbn = findViewById<TextView>(R.id.txtKbn)
-        val txtFullAddr = findViewById<TextView>(R.id.txtFullAddr)
-        val txtQty = findViewById<TextView>(R.id.txtQty)
 
-        val edtBox = findViewById<EditText>(R.id.edtBox)
+        edtBox = findViewById<EditText>(R.id.edtBox)
         val edtPcs = findViewById<EditText>(R.id.edtPcs)
         val edtSeq = findViewById<EditText>(R.id.edtSeq)
-        val edtOrder = findViewById<EditText>(R.id.edtOrder)
+        edtOrder = findViewById<EditText>(R.id.edtOrder) // ช่องสำหรับกรอก Order ของคุณ
 
-        val btnNotFound = findViewById<Button>(R.id.btnNotFound)
-        val btnBack = findViewById<Button>(R.id.btnBack)
         val btnSave = findViewById<Button>(R.id.btnSave)
+        val btnBack = findViewById<Button>(R.id.btnBack)
+        val btnNotFound = findViewById<Button>(R.id.btnNotFound)
 
-        // รับข้อมูลจาก Intent (รับ ITEM_ID มาด้วยเพื่อใช้อ้างอิงตอนอัปเดต)
-        val itemId = intent.getIntExtra("ITEM_ID", -1)
-        val supplier = intent.getStringExtra("SUPPLIER") ?: "-"
-        val partNo = intent.getStringExtra("PART_NO") ?: "-"
-        val partName = intent.getStringExtra("PART_NAME") ?: "-"
-        val kbn = intent.getStringExtra("KBN") ?: "-"
-        val fullAddr = intent.getStringExtra("FULL_ADDR") ?: "-"
-        val qty = intent.getIntExtra("QTY", 0)
-        val savedBox = intent.getStringExtra("BOX") ?: ""
-        val savedPcs = intent.getStringExtra("PCS") ?: ""
-        val savedSeq = intent.getStringExtra("SEQ") ?: ""
-        // โชว์ข้อมูล
-        txtSupplier.text = supplier
-        txtPartNo.text = partNo
-        txtPartName.text = partName
+        // แสดงข้อมูลลงบนหน้าจอ
         txtKbn.text = kbn
-        txtFullAddr.text = fullAddr
-        txtQty.text = qty.toString()
+        txtFullAddress.text = fullAddr
+        txtPartName.text = partName
+        edtBox.setText(box)
+        edtPcs.setText(pcs)
+        edtSeq.setText(seq)
+        edtOrder.setText(lastOrder) // แสดงข้อมูล lastOrder เดิมในช่อง
 
-        edtBox.setText(savedBox)
-        edtPcs.setText(savedPcs)
-        edtSeq.setText(savedSeq)
+        // โฟกัสไปที่ช่อง Box อัตโนมัติรอให้สแกนหรือพิมพ์
+        edtBox.requestFocus()
+
+        // ปุ่ม Save (บันทึกข้อมูล)
+        btnSave.setOnClickListener {
+            val newBox = edtBox.text.toString()
+            val newPcs = edtPcs.text.toString()
+            val newSeq = edtSeq.text.toString()
+            val newLastOrder = edtOrder.text.toString() // ดึงค่าจากช่อง Order เพื่อเตรียมเซฟ
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                // ส่งค่า newLastOrder ไปอัปเดตลง Database
+                db.inventoryDao().updateStockData(itemId, newBox, newPcs, newSeq, newLastOrder)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@Screen5Activity, "Saved Successfully", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
+
+        btnBack.setOnClickListener { finish() }
 
         btnNotFound.setOnClickListener {
             edtBox.setText("0")
             edtPcs.setText("0")
-            edtOrder.setText("0")
-
         }
+    }
 
-        btnBack.setOnClickListener {
-            finish()
+    // ==========================================================
+    // ดักจับสัญญาณจากปืนสแกนเนอร์
+    // ==========================================================
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.deviceId > 0 && event.action == KeyEvent.ACTION_DOWN) {
+
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
+                val scannedText = barcodeBuffer.toString().trim()
+                if (scannedText.isNotEmpty()) {
+                    verifyScannedBarcode(scannedText)
+                    barcodeBuffer.clear()
+                }
+                return true
+            } else {
+                val char = event.unicodeChar.toChar()
+                if (char.code > 0) {
+                    barcodeBuffer.append(char)
+                    return true
+                }
+            }
         }
+        return super.dispatchKeyEvent(event)
+    }
 
-        // กดปุ่ม Save -> บันทึกลง Room Database
-        btnSave.setOnClickListener {
-            val box = edtBox.text.toString().trim()
-            val pcs = edtPcs.text.toString().trim()
-            val seq = edtSeq.text.toString().trim()
+    // ==========================================================
+    // หั่นบาร์โค้ดเช็คความถูกต้อง + บวกเลข Box อัตโนมัติ (1 สแกน = 1 Box)
+    // ==========================================================
+    private fun verifyScannedBarcode(rawBarcode: String) {
+        try {
+            if (rawBarcode.length >= 71) {
+                // ดึง KBN ออกมาจากบาร์โค้ดยาวๆ (ตำแหน่งที่ 67-70)
+                val scannedKbn = rawBarcode.substring(67, 71).trim()
+                val expectedKbn = txtKbn.text.toString().trim()
 
-            // 1. เช็คว่ากรอกครบทุกช่องไหม
-            if (box.isEmpty() || pcs.isEmpty() || seq.isEmpty()) {
-                Toast.makeText(this, "กรุณากรอก Box, Pcs และ Seq ให้ครบ", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+                // ตรวจสอบความถูกต้อง
+                if (scannedKbn == expectedKbn) {
 
-            // ==========================================
-            // 2. เพิ่มเงื่อนไขเช็คว่า Seq ต้องมี 3 หลักเท่านั้น
-            // ==========================================
-            if (seq.length != 3) {
-                Toast.makeText(this, "กรุณากรอก Seq ให้ครบ 3 หลัก (เช่น 001)", Toast.LENGTH_SHORT)
-                    .show()
-                // ให้เด้งไปโฟกัสที่ช่อง Seq เพื่อให้ผู้ใช้พิมพ์แก้ได้เลย
-                edtSeq.requestFocus()
-                return@setOnClickListener
-            }
+                    val currentBox = edtBox.text.toString().toIntOrNull() ?: 0
+                    val newBoxCount = currentBox + 1
 
-            // 3. ถ้าผ่านเงื่อนไขทั้งหมด ค่อยบันทึกข้อมูล
-            if (itemId != -1) {
-                // บันทึกข้อมูลแบบ Asynchronous ด้วย Coroutine
-                lifecycleScope.launch(Dispatchers.IO) {
-                    db.inventoryDao().updateStockData(itemId, box, pcs, seq)
+                    edtBox.setText(newBoxCount.toString())
+                    edtBox.setSelection(edtBox.text.length)
 
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@Screen5Activity, "Saved!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "✅ KBN Match! นับเป็น $newBoxCount กล่องแล้ว", Toast.LENGTH_SHORT).show()
 
-                        // ส่งสัญญาณบอกหน้า 4 ว่าเซฟสำเร็จแล้ว
-                        val resultIntent = Intent()
-                        setResult(Activity.RESULT_OK, resultIntent)
-                        finish()
+                } else {
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle("❌ WRONG PART!")
+                    builder.setMessage("คุณสแกนผิดชิ้นครับ!\n\nที่สแกนได้: KBN $scannedKbn\nที่ต้องหยิบ: KBN $expectedKbn\n\nกรุณาตรวจสอบของในกล่องอีกครั้ง!")
+                    builder.setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                        edtBox.requestFocus()
                     }
+                    builder.create().show()
                 }
             } else {
-                Toast.makeText(this, "ไม่พบ ID ของสินค้านี้", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "❌ บาร์โค้ดผิดรูปแบบ", Toast.LENGTH_SHORT).show()
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "❌ เกิดข้อผิดพลาดในการอ่านบาร์โค้ด", Toast.LENGTH_SHORT).show()
         }
     }
 }
