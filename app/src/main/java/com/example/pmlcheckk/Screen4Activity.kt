@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -30,16 +33,15 @@ class Screen4Activity : AppCompatActivity() {
     private lateinit var recyclerViewPartList: RecyclerView
     private lateinit var btnBack: Button
     private lateinit var btnEdit: Button
-    private lateinit var btnNext: Button
+    private lateinit var edtFastScan: EditText // ช่องสแกนใหม่
 
     private var myPartList = mutableListOf<InventoryItem>()
     private var selectedAddress: String = ""
 
-    // สร้างตัวรับ Result ที่เด้งกลับมาจากหน้า 5
     private val startScreen5ForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK || result.resultCode == Activity.RESULT_CANCELED) {
-            // หากหน้า 5 ปิดลงมา ให้โหลดข้อมูลจาก Database ใหม่เพื่ออัปเดตตัวเลข Remain และสลับสี
             loadDataFromDatabase(selectedAddress)
+            edtFastScan.requestFocus() // กลับมาหน้า 4 ให้โฟกัสช่องสแกนรอเลย
         }
     }
 
@@ -52,55 +54,87 @@ class Screen4Activity : AppCompatActivity() {
         recyclerViewPartList = findViewById(R.id.recyclerViewPartList)
         btnBack = findViewById(R.id.btnBack)
         btnEdit = findViewById(R.id.btnEdit)
-        btnNext = findViewById(R.id.btnNext)
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "pml_db"
-        ).build()
+        // ผูกช่องสแกน
+        edtFastScan = findViewById(R.id.edtFastScan)
+
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pml_db").build()
 
         selectedAddress = intent.getStringExtra("SELECTED_ADDRESS") ?: "M01: PART LIST"
         txtHeaderAddress.text = selectedAddress
 
         recyclerViewPartList.layoutManager = LinearLayoutManager(this)
 
-        // ส่ง Callback เมื่อมีการคลิก Item เข้าไปที่ Adapter
         adapter = PartListAdapter(myPartList) { item ->
-            val intent = Intent(this, Screen5Activity::class.java)
-
-            // 🚨 ปรับชื่อ Key ให้ตรงกับที่ Screen 5 รอรับ และเพิ่ม ITEM_LASTORDER เข้าไป
-            intent.putExtra("ITEM_ID", item.id)
-            intent.putExtra("ITEM_KBN", item.kbn)
-            intent.putExtra("ITEM_ADDR", item.fullAddr)
-            intent.putExtra("ITEM_PARTNAME", item.partName)
-            intent.putExtra("ITEM_BOX", item.box)
-            intent.putExtra("ITEM_PCS", item.pcs)
-            intent.putExtra("ITEM_SEQ", item.seq)
-            intent.putExtra("ITEM_LASTORDER", item.lastOrder)
-
-            // ส่งข้อมูลเพิ่มเติมเผื่อต้องใช้
-            intent.putExtra("PART_NO", item.partNo)
-            intent.putExtra("SUPPLIER", item.sup)
-            intent.putExtra("QTY", item.qty ?: 0)
-
-            // เปิดหน้า 5 แบบรอรับผลลัพธ์
-            startScreen5ForResult.launch(intent)
+            openScreen5(item)
         }
-
         recyclerViewPartList.adapter = adapter
 
         loadDataFromDatabase(selectedAddress)
 
-        btnBack.setOnClickListener {
-            finish()
+        // ========================================================
+        // ระบบ Fast Scan ดักจับปุ่ม Enter เมื่อยิงบาร์โค้ด
+        // ========================================================
+        edtFastScan.requestFocus()
+        edtFastScan.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                val rawBarcode = edtFastScan.text.toString().trim()
+                if (rawBarcode.isNotEmpty()) {
+                    processFastScan(rawBarcode)
+                    edtFastScan.text.clear() // เคลียร์ช่องให้ว่างเสมอ
+                }
+                edtFastScan.requestFocus()
+                return@setOnKeyListener true
+            }
+            false
         }
-        btnNext.setOnClickListener {
-            // TODO: ใส่โค้ดไปหน้าถัดไปในอนาคต
+
+        btnBack.setOnClickListener { finish() }
+        btnEdit.setOnClickListener { showEditDialog() }
+    }
+
+    private fun processFastScan(rawBarcode: String) {
+        // 1. หั่นบาร์โค้ด
+        val scannedKbn = if (rawBarcode.length >= 71) {
+            rawBarcode.substring(67, 71).trim()
+        } else if (rawBarcode.length <= 10) {
+            rawBarcode.trim()
+        } else {
+            Toast.makeText(this, "❌ บาร์โค้ดผิดรูปแบบ", Toast.LENGTH_SHORT).show()
+            return
         }
-        btnEdit.setOnClickListener {
-            showEditDialog()
+
+        // 2. ค้นหาว่ามี KBN นี้ใน Address นี้หรือไม่
+        val foundItem = myPartList.find { it.kbn.equals(scannedKbn, ignoreCase = true) }
+
+        if (foundItem != null) {
+            // เจอของ -> เปิดหน้า 5
+            openScreen5(foundItem)
+        } else {
+            // ไม่เจอของ
+            Toast.makeText(this, "❌ ไม่พบ KBN : $scannedKbn ใน Address นี้!", Toast.LENGTH_LONG).show()
         }
     }
+
+    private fun openScreen5(item: InventoryItem) {
+        val intent = Intent(this, Screen5Activity::class.java)
+        intent.putExtra("ITEM_ID", item.id)
+        intent.putExtra("ITEM_KBN", item.kbn)
+        intent.putExtra("ITEM_ADDR", item.fullAddr)
+        intent.putExtra("ITEM_PARTNAME", item.partName)
+        intent.putExtra("ITEM_BOX", item.box)
+        intent.putExtra("ITEM_PCS", item.pcs)
+        intent.putExtra("ITEM_SEQ", item.seq)
+        intent.putExtra("ITEM_LASTORDER", item.lastOrder)
+        intent.putExtra("PART_NO", item.partNo)
+        intent.putExtra("SUPPLIER", item.sup)
+        intent.putExtra("QTY", item.qty ?: 0)
+
+        startScreen5ForResult.launch(intent)
+    }
+
+    // ... (ฟังก์ชัน showEditDialog และ loadDataFromDatabase ใช้ของเดิมที่คุณมีได้เลยครับ) ...
+    // ... (ส่วน PartListAdapter ด้านล่างก็ใช้ของเดิมได้เลยครับ) ...
 
     private fun showEditDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_kbn, null)

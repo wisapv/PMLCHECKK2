@@ -73,8 +73,6 @@ class FreeZoneScanActivity : AppCompatActivity() {
                             // ใช้คำสั่ง substring ดึงตัวอักษรตั้งแต่ตำแหน่งที่ 67 ถึง 71 (ไม่รวม 71)
                             finalKbn = rawBarcode.substring(67, 71).trim()
                         }
-                        // 💡 ทริคเสริม: ถ้าบาร์โค้ดมีการขยับหน้าหลังนิดหน่อย
-                        // เราสามารถใช้ Regex จับรูปแบบ Date+Time แทนได้ (ถ้าสนใจบอกผมได้ครับ)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -91,7 +89,6 @@ class FreeZoneScanActivity : AppCompatActivity() {
                 return@setOnKeyListener true
             }
             false
-
         }
 
         // ========================================================
@@ -122,11 +119,39 @@ class FreeZoneScanActivity : AppCompatActivity() {
 
             lifecycleScope.launch(Dispatchers.IO) {
                 for (scanned in scannedList) {
-                    val dbItem = db.inventoryDao().getItemByKbn(scanned.kbn)
-                    if (dbItem != null) {
-                        val currentBox = dbItem.box?.toIntOrNull() ?: 0
+
+                    // 1. เช็คก่อนว่าใน Freelane (Zone) นี้ มี KBN นี้ถูกบันทึกไว้หรือยัง
+                    val existingZoneItem = db.inventoryDao().getFreeZoneItem(scanned.kbn, targetZone)
+
+                    if (existingZoneItem != null) {
+                        // กรณีที่ 1: มีข้อมูลใน Freelane อยู่แล้ว -> ให้อัปเดตบวกยอด Box เพิ่ม
+                        val currentBox = existingZoneItem.box?.toIntOrNull() ?: 0
                         val newBoxTotal = currentBox + scanned.boxCount
-                        db.inventoryDao().updateFreeZoneData(scanned.kbn, newBoxTotal.toString(), targetZone)
+                        db.inventoryDao().updateSpecificFreeZoneData(scanned.kbn, newBoxTotal.toString(), targetZone)
+                    } else {
+                        // กรณีที่ 2: ยังไม่มีข้อมูลใน Freelane -> ไปดึงข้อมูลต้นแบบจาก Lineside มา
+                        val templateItem = db.inventoryDao().getItemByKbn(scanned.kbn)
+
+                        if (templateItem != null) {
+                            // ก๊อปปี้ข้อมูล PartNo, PartName มาสร้างเป็นแถวใหม่สำหรับ Freelane โดยเฉพาะ
+                            val newZoneItem = templateItem.copy(
+                                id = 0, // สำคัญมาก! การเซ็ต id = 0 จะบังคับให้ Room สร้าง ID แถวใหม่ ไม่ทับของเดิม
+                                box = scanned.boxCount.toString(),
+                                pcs = "", // ล้างค่า pcs เผื่อไว้
+                                addrGroup = targetZone,
+                                fullAddr = targetZone
+                            )
+                            db.inventoryDao().insertItem(newZoneItem)
+                        } else {
+                            // กรณีที่ 3: สแกน KBN แปลกปลอมที่ไม่เคยมีในฐานข้อมูล Lineside เลย (สร้างใหม่แบบว่างๆ)
+                            val unknownItem = InventoryItem(
+                                kbn = scanned.kbn,
+                                box = scanned.boxCount.toString(),
+                                addrGroup = targetZone,
+                                fullAddr = targetZone
+                            )
+                            db.inventoryDao().insertItem(unknownItem)
+                        }
                     }
                 }
                 withContext(Dispatchers.Main) {

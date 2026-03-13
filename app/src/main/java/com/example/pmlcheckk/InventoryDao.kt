@@ -20,7 +20,7 @@ interface InventoryDao {
     @Query("SELECT * FROM inventory_table WHERE addrGroup = :groupName")
     suspend fun getItemsByGroup(groupName: String): List<InventoryItem>
 
-    // 🚨 อัปเดตเพิ่ม lastOrder เข้าไปในคำสั่งนี้ให้ตรงกับตัวแปรคุณ
+    // อัปเดตเพิ่ม lastOrder เข้าไปในคำสั่งนี้ให้ตรงกับตัวแปรคุณ
     @Query("UPDATE inventory_table SET Box = :box, Pcs = :pcs, Seq = :seq, lastOrder = :lastOrder WHERE id = :id")
     suspend fun updateStockData(id: Int, box: String, pcs: String, seq: String, lastOrder: String)
 
@@ -28,11 +28,23 @@ interface InventoryDao {
     suspend fun getCompletedItemsCount(): Int
 
     // ==========================================
-    // คำสั่งสำหรับโหมด Free Zone
+    // คำสั่งสำหรับโหมด Free Zone (เก่า)
     // ==========================================
     @Query("SELECT * FROM inventory_table WHERE kbn = :kbn LIMIT 1")
     suspend fun getItemByKbn(kbn: String): InventoryItem?
 
     @Query("UPDATE inventory_table SET Box = :box, addrGroup = :zone, fullAddr = :zone WHERE kbn = :kbn")
     suspend fun updateFreeZoneData(kbn: String, box: String, zone: String)
+
+    // ==========================================
+    // คำสั่งสำหรับโหมด Free Zone (อัปเดตใหม่ เพื่อแยก Lineside ขาดจาก Freelane)
+    // ==========================================
+    @Query("SELECT * FROM inventory_table WHERE kbn = :kbn AND addrGroup = :zone LIMIT 1")
+    suspend fun getFreeZoneItem(kbn: String, zone: String): InventoryItem?
+
+    @Query("UPDATE inventory_table SET Box = :box WHERE kbn = :kbn AND addrGroup = :zone")
+    suspend fun updateSpecificFreeZoneData(kbn: String, box: String, zone: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertItem(item: InventoryItem)
 }
