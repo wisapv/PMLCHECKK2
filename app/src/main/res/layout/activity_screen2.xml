@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Data Synchronization"
+            android:text=" UPDATE PART LIST 🌺✨"
             android:textColor="@color/text_primary"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -23,16 +23,16 @@
 
         <Button
             android:id="@+id/btnLoadList"
-            android:layout_width="match_parent"
+            android:layout_width="281dp"
             android:layout_height="60dp"
-            android:text="Load List from Cloud"
-            android:textColor="@color/text_primary"
-            android:textAllCaps="false"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
             android:background="@drawable/bg_modern_card"
             android:backgroundTint="@color/accent_purple"
-            android:layout_marginBottom="16dp"/>
+            android:text="Load List from Cloud"
+            android:textAllCaps="false"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtUpdated"

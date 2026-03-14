@@ -13,12 +13,12 @@
     android:textColor="@color/text_primary"
     android:layout_marginBottom="8dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="กรุณากรอก KBN ที่ต้องการแก้ไข"
-        android:textColor="@color/text_secondary"
-        android:layout_marginBottom="16dp"/>
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="กรุณากรอก KBN ที่ต้องการแก้ไข"-->
+<!--        android:textColor="@color/text_secondary"-->
+<!--        android:layout_marginBottom="16dp"/>-->
 
     <AutoCompleteTextView
         android:id="@+id/edtDialogKbn"

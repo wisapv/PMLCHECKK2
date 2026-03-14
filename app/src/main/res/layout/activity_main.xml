@@ -15,31 +15,24 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="48dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="48dp">
-
-            <View
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:background="@drawable/bg_modern_card"
-                android:backgroundTint="@color/accent_pink"
-                android:layout_marginEnd="12dp"/>
+            android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text=" PML CHECK STOCK "
+                android:letterSpacing="0.05"
+                android:text=" PML CHECK STOCK🌷✨"
                 android:textColor="@color/text_primary"
-                android:textSize="26sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.05"/>
+                android:textSize="23sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/btnRunOut"
-            android:layout_width="324dp"
-            android:layout_height="84dp"
+            android:layout_width="262dp"
+            android:layout_height="80dp"
             android:layout_marginBottom="24dp"
             android:background="@drawable/bg_modern_card"
             android:clickable="true"
@@ -51,9 +44,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="RUN OUT"
-                android:textColor="@color/accent_purple"
-                android:textSize="22sp"
+                android:text="🚨️ RUN OUT "
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -61,35 +54,35 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="For RUN OUT Items"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/accent_pink"
                 android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/btnCheckStock"
-            android:layout_width="322dp"
-            android:layout_height="95dp"
-            android:background="@drawable/bg_modern_card"
+            android:layout_width="265dp"
+            android:layout_height="78dp"
+            android:background="@drawable/bggg"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="GETSUDO"
-                android:textColor="@color/accent_pink"
-                android:textSize="22sp"
+                android:text="🌿 GETSUDO"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:text="For GETSUDO stock counting"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/accent_pink"
                 android:textSize="12sp" />
         </LinearLayout>
 
