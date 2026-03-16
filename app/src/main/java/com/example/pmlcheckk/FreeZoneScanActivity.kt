@@ -71,7 +71,7 @@ class FreeZoneScanActivity : AppCompatActivity() {
                         // เช็คก่อนว่าบาร์โค้ดยาวพอไหม (ป้องกัน error ถ้ายิง QR ผิดประเภท)
                         if (rawBarcode.length >= 71) {
                             // ใช้คำสั่ง substring ดึงตัวอักษรตั้งแต่ตำแหน่งที่ 67 ถึง 71 (ไม่รวม 71)
-                            finalKbn = rawBarcode.substring(67, 71).trim()
+                            finalKbn = rawBarcode.substring(68, 72).trim()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

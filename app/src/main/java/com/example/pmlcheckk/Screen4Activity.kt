@@ -33,7 +33,7 @@ class Screen4Activity : AppCompatActivity() {
     private lateinit var recyclerViewPartList: RecyclerView
     private lateinit var btnBack: Button
     private lateinit var btnEdit: Button
-    private lateinit var edtFastScan: EditText // ช่องสแกนใหม่
+    private lateinit var edtFastScan: EditText
 
     private var myPartList = mutableListOf<InventoryItem>()
     private var selectedAddress: String = ""
@@ -41,7 +41,6 @@ class Screen4Activity : AppCompatActivity() {
     private val startScreen5ForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK || result.resultCode == Activity.RESULT_CANCELED) {
             loadDataFromDatabase(selectedAddress)
-            /*edtFastScan.requestFocus() */// กลับมาหน้า 4 ให้โฟกัสช่องสแกนรอเลย
         }
     }
 
@@ -54,8 +53,6 @@ class Screen4Activity : AppCompatActivity() {
         recyclerViewPartList = findViewById(R.id.recyclerViewPartList)
         btnBack = findViewById(R.id.btnBack)
         btnEdit = findViewById(R.id.btnEdit)
-
-        // ผูกช่องสแกน
         edtFastScan = findViewById(R.id.edtFastScan)
 
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pml_db").build()
@@ -72,47 +69,38 @@ class Screen4Activity : AppCompatActivity() {
 
         loadDataFromDatabase(selectedAddress)
 
-        // ========================================================
-        // ระบบ Fast Scan ดักจับปุ่ม Enter เมื่อยิงบาร์โค้ด
-        // ========================================================
-//        edtFastScan.requestFocus()
-//        edtFastScan.setOnKeyListener { _, keyCode, event ->
-//            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-//                val rawBarcode = edtFastScan.text.toString().trim()
-//                if (rawBarcode.isNotEmpty()) {
-//                    processFastScan(rawBarcode)
-//                    edtFastScan.text.clear() // เคลียร์ช่องให้ว่างเสมอ
-//                }
-//                edtFastScan.requestFocus()
-//                return@setOnKeyListener true
-//            }
-//            false
-//        }
+        // ปิดไม่ให้คีย์บอร์ดบนหน้าจอเด้งขึ้นมา
+        edtFastScan.showSoftInputOnFocus = false
+
+        // ดักจับข้อมูลหลังสแกนเสร็จ (กด Enter)
+        edtFastScan.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                val rawBarcode = edtFastScan.text.toString().trim()
+                if (rawBarcode.isNotEmpty()) {
+                    processFastScan(rawBarcode)
+                    // เมื่อเช็คเสร็จ เคลียร์ข้อมูลชุดยาวๆ ในช่องทิ้งทันที
+                    edtFastScan.text.clear()
+                }
+                return@setOnKeyListener true
+            }
+            false
+        }
 
         btnBack.setOnClickListener { finish() }
         btnEdit.setOnClickListener { showEditDialog() }
     }
 
     private fun processFastScan(rawBarcode: String) {
-        // 1. หั่นบาร์โค้ด
-        val scannedKbn = if (rawBarcode.length >= 71) {
-            rawBarcode.substring(67, 71).trim()
-        } else if (rawBarcode.length <= 10) {
-            rawBarcode.trim()
-        } else {
-            Toast.makeText(this, "❌ บาร์โค้ดผิดรูปแบบ", Toast.LENGTH_SHORT).show()
-            return
+        // ลอจิกใหม่: ค้นหาว่าในก้อนข้อความที่สแกนมา มี KBN ของตัวไหนใน Address นี้แฝงอยู่บ้าง
+        val foundItem = myPartList.find { item ->
+            val kbn = item.kbn?.trim() ?: ""
+            kbn.isNotEmpty() && rawBarcode.contains(kbn, ignoreCase = true)
         }
 
-        // 2. ค้นหาว่ามี KBN นี้ใน Address นี้หรือไม่
-        val foundItem = myPartList.find { it.kbn.equals(scannedKbn, ignoreCase = true) }
-
         if (foundItem != null) {
-            // เจอของ -> เปิดหน้า 5
             openScreen5(foundItem)
         } else {
-            // ไม่เจอของ
-            Toast.makeText(this, "❌ ไม่พบ KBN : $scannedKbn ใน Address นี้!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "❌ ไม่พบ KBN ที่ตรงกันใน Address นี้!", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -135,9 +123,6 @@ class Screen4Activity : AppCompatActivity() {
         startScreen5ForResult.launch(intent)
     }
 
-    // ... (ฟังก์ชัน showEditDialog และ loadDataFromDatabase ใช้ของเดิมที่คุณมีได้เลยครับ) ...
-    // ... (ส่วน PartListAdapter ด้านล่างก็ใช้ของเดิมได้เลยครับ) ...
-
     private fun showEditDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_kbn, null)
 
@@ -150,7 +135,6 @@ class Screen4Activity : AppCompatActivity() {
         val btnOk = dialogView.findViewById<android.widget.Button>(R.id.btnDialogOk)
         val btnCancel = dialogView.findViewById<android.widget.Button>(R.id.btnDialogCancel)
 
-        // ดึงชื่อ KBN ที่เคยกรอกข้อมูลแล้วมาใส่ Dropdown
         val savedKbnList = myPartList
             .filter { !it.box.isNullOrEmpty() }
             .mapNotNull { it.kbn }
@@ -176,23 +160,7 @@ class Screen4Activity : AppCompatActivity() {
             }
 
             if (foundItem != null) {
-                val intent = Intent(this, Screen5Activity::class.java)
-
-                // 🚨 ปรับชื่อ Key และส่ง ITEM_LASTORDER เช่นเดียวกัน
-                intent.putExtra("ITEM_ID", foundItem.id)
-                intent.putExtra("ITEM_KBN", foundItem.kbn)
-                intent.putExtra("ITEM_ADDR", foundItem.fullAddr)
-                intent.putExtra("ITEM_PARTNAME", foundItem.partName)
-                intent.putExtra("ITEM_BOX", foundItem.box)
-                intent.putExtra("ITEM_PCS", foundItem.pcs)
-                intent.putExtra("ITEM_SEQ", foundItem.seq)
-                intent.putExtra("ITEM_LASTORDER", foundItem.lastOrder)
-
-                intent.putExtra("PART_NO", foundItem.partNo)
-                intent.putExtra("SUPPLIER", foundItem.sup)
-                intent.putExtra("QTY", foundItem.qty ?: 0)
-
-                startScreen5ForResult.launch(intent)
+                openScreen5(foundItem)
                 dialog.dismiss()
             } else {
                 android.widget.Toast.makeText(this, "ไม่พบ KBN นี้ หรือข้อมูลนี้ยังไม่ได้บันทึก", android.widget.Toast.LENGTH_SHORT).show()
@@ -212,13 +180,11 @@ class Screen4Activity : AppCompatActivity() {
                 db.inventoryDao().getItemsByGroup(groupName)
             }
 
-            // จัดเรียงข้อมูล: เอา item ที่ box ยังเป็นค่าว่างไว้ด้านบนสุด
             val sortedItems = items.sortedBy { !it.box.isNullOrEmpty() }
 
             myPartList.clear()
             myPartList.addAll(sortedItems)
 
-            // อัปเดต Remain Count
             val remainCount = sortedItems.count { it.box.isNullOrEmpty() }
             txtRemainCount.text = remainCount.toString()
 
@@ -253,7 +219,6 @@ class PartListAdapter(
         holder.txtKbn.text = item.kbn ?: "-"
         holder.txtAddress.text = item.fullAddr
 
-        // ตรวจสอบสถานะการตรวจเช็ค เพื่อเปลี่ยนสีปุ่ม KBN
         if (!item.box.isNullOrEmpty()) {
             holder.txtKbn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#5C5470"))
             holder.txtKbn.setTextColor(Color.WHITE)
