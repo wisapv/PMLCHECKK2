@@ -41,7 +41,7 @@ class Screen4Activity : AppCompatActivity() {
     private val startScreen5ForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK || result.resultCode == Activity.RESULT_CANCELED) {
             loadDataFromDatabase(selectedAddress)
-            edtFastScan.requestFocus() // กลับมาหน้า 4 ให้โฟกัสช่องสแกนรอเลย
+            /*edtFastScan.requestFocus() */// กลับมาหน้า 4 ให้โฟกัสช่องสแกนรอเลย
         }
     }
 
@@ -75,19 +75,19 @@ class Screen4Activity : AppCompatActivity() {
         // ========================================================
         // ระบบ Fast Scan ดักจับปุ่ม Enter เมื่อยิงบาร์โค้ด
         // ========================================================
-        edtFastScan.requestFocus()
-        edtFastScan.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                val rawBarcode = edtFastScan.text.toString().trim()
-                if (rawBarcode.isNotEmpty()) {
-                    processFastScan(rawBarcode)
-                    edtFastScan.text.clear() // เคลียร์ช่องให้ว่างเสมอ
-                }
-                edtFastScan.requestFocus()
-                return@setOnKeyListener true
-            }
-            false
-        }
+//        edtFastScan.requestFocus()
+//        edtFastScan.setOnKeyListener { _, keyCode, event ->
+//            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+//                val rawBarcode = edtFastScan.text.toString().trim()
+//                if (rawBarcode.isNotEmpty()) {
+//                    processFastScan(rawBarcode)
+//                    edtFastScan.text.clear() // เคลียร์ช่องให้ว่างเสมอ
+//                }
+//                edtFastScan.requestFocus()
+//                return@setOnKeyListener true
+//            }
+//            false
+//        }
 
         btnBack.setOnClickListener { finish() }
         btnEdit.setOnClickListener { showEditDialog() }
@@ -127,7 +127,9 @@ class Screen4Activity : AppCompatActivity() {
         intent.putExtra("ITEM_SEQ", item.seq)
         intent.putExtra("ITEM_LASTORDER", item.lastOrder)
         intent.putExtra("PART_NO", item.partNo)
-        intent.putExtra("SUPPLIER", item.sup)
+        val supName = item.sup ?: "-"
+        val splantName = item.splant ?: "-"
+        intent.putExtra("SUPPLIER", "$supName-$splantName")
         intent.putExtra("QTY", item.qty ?: 0)
 
         startScreen5ForResult.launch(intent)
