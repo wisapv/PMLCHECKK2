@@ -15,6 +15,8 @@ import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 class Screen5Activity : AppCompatActivity() {
 
@@ -35,6 +37,11 @@ class Screen5Activity : AppCompatActivity() {
 
     // ตัวแปรจดจำจำนวนกล่องแบบเรียลไทม์
     private var currentBoxCount: Int = 0
+    private var debounceJob: Job? = null
+    private var isProcessingScan: Boolean = false
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,47 +72,76 @@ class Screen5Activity : AppCompatActivity() {
         edtBox.setText(currentBoxCount.toString())
         edtBox.requestFocus()
 
-        // 1. ตรวจจับและอัปเดตค่าเมื่อ User พิมพ์ตัวเลขด้วยคีย์บอร์ดมือถือปกติ
+        // 1. ประกาศตัวแปรเพื่อช่วยแยกแยะระหว่างคนพิมพ์ กับ ปืนสแกน
+        var lastInputTime = 0L
+        var validBoxCountBeforeScan = currentBoxCount
+
+        // ตรวจจับและอัปเดตค่าเมื่อ User พิมพ์ตัวเลขด้วยคีย์บอร์ดมือถือปกติ
+        // ------------------------------------------------------------------
+        // ระบบดักจับการสแกน และการพิมพ์ด้วยมือ
+        // ------------------------------------------------------------------
         edtBox.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
             override fun afterTextChanged(s: Editable?) {
+                if (isProcessingScan) return // ป้องกันการวนลูป
+
                 val text = s?.toString()?.trim() ?: ""
-                // ถ้าสั้นๆ (ไม่เกิน 10 ตัว) แสดงว่าเป็นคนพิมพ์ ไม่ใช่ปืนสแกน ให้จำค่าไว้
-                if (text.length <= 10 && text.isNotEmpty()) {
-                    currentBoxCount = text.toIntOrNull() ?: currentBoxCount
+
+                // ยกเลิกเวลานับถอยหลังอันเก่า ทุกครั้งที่ปืนสแกนพิมพ์ตัวอักษรใหม่เข้ามา
+                debounceJob?.cancel()
+
+                // เริ่มจับเวลาใหม่ รอจนกว่าปืนสแกนจะหยุดพิมพ์ (หยุดนิ่ง 300ms)
+                debounceJob = lifecycleScope.launch {
+                    delay(300)
+
+                    isProcessingScan = true // ล็อคระบบกัน UI สับสน
+
+                    // 1. ถ้าข้อความยาวกว่า 5 ตัวอักษร ถือว่ามาจากการ "สแกนบาร์โค้ด" แน่นอน
+                    // (เพราะคนคงไม่พิมพ์จำนวนกล่องเกิน 5 หลักด้วยมือ)
+                    if (text.length > 5) {
+                        val expectedKbn = txtKbn.text.toString().trim()
+
+                        if (text.contains(expectedKbn, ignoreCase = true)) {
+                            // MATCH! สแกนถูก
+                            currentBoxCount += 1
+                            Toast.makeText(this@Screen5Activity, "✅ KBN Match! บวกเพิ่ม 1 กล่อง", Toast.LENGTH_SHORT).show()
+
+                            edtBox.setText(currentBoxCount.toString())
+                            edtBox.selectAll()
+                        } else {
+                            // ไม่ MATCH! สแกนผิด
+                            // คืนค่ากลับเป็นเลขที่ถูกต้อง "ทันที" ในครั้งแรก
+                            edtBox.setText(currentBoxCount.toString())
+                            edtBox.selectAll()
+
+                            // แล้วค่อยเรียกหน้าต่าง Error
+                            showWrongPartDialog(text, expectedKbn)
+                        }
+                    }
+                    // 2. ถ้าข้อความสั้นๆ (ไม่เกิน 5 ตัว) ถือว่า User ตั้งใจเอานิ้วจิ้มพิมพ์ตัวเลข
+                    else if (text.isNotEmpty()) {
+                        val parsed = text.toIntOrNull()
+                        if (parsed != null) {
+                            currentBoxCount = parsed // บันทึกค่าที่คนพิมพ์มือไว้
+                        }
+                    }
+
+                    isProcessingScan = false // ปลดล็อคระบบ
                 }
             }
         })
 
-        // 2. ดักจับเมื่อปืนสแกนยิงข้อความเข้ามาเสร็จ (ปืนสแกนจะส่งปุ่ม Enter ปิดท้ายเสมอ)
-        edtBox.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                // ดึงข้อความดิบทั้งหมดที่กองอยู่ในช่อง Box
-                val rawData = edtBox.text.toString().trim()
-
-                // ถ้ายาวเกิน 20 ตัว แปลว่ามาจากการสแกนแน่นอน
-                if (rawData.length > 20) {
-                    val expectedKbn = txtKbn.text.toString().trim()
-
-                    // ลอจิกคุณ: จับทั้งชุดข้อความมาเช็คว่ามี KBN ไหม
-                    if (rawData.contains(expectedKbn, ignoreCase = true)) {
-                        // MATCH! บวก 1
-                        currentBoxCount += 1
-                        Toast.makeText(this@Screen5Activity, "✅ KBN Match! บวกเพิ่ม 1 กล่อง", Toast.LENGTH_SHORT).show()
-                    } else {
-                        // ไม่ MATCH! แจ้งเตือน Error
-                        showWrongPartDialog(rawData, expectedKbn)
-                    }
-
-                    // *** ทีเด็ดอยู่ตรงนี้ ***
-                    // ไม่ว่าสแกนถูกหรือผิด เราจะเขียนทับข้อมูลยาวๆ ทิ้ง ด้วยตัวเลขที่ถูกต้อง (N หรือ N+1)
-                    edtBox.setText(currentBoxCount.toString())
-                    edtBox.setSelection(edtBox.text.length)
-                }
-                return@setOnKeyListener true // กลืนปุ่ม Enter ไปไม่ให้มันขึ้นบรรทัดใหม่
+        // (เผื่อไว้) ดักการกด Enter จาก Keyboard มือถือ หรือปืนสแกนบางรุ่นที่ชอบส่ง Action Done
+        // ไม่ให้มันเด้งไปช่องอื่นหรือขึ้นบรรทัดใหม่
+        edtBox.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER)) {
+                return@setOnEditorActionListener true
             }
             false
+
         }
 
         btnSave.setOnClickListener {
@@ -140,6 +176,7 @@ class Screen5Activity : AppCompatActivity() {
             edtPcs.setText("0")
             edtSeq.setText("000")
             currentBoxCount = 0
+            validBoxCountBeforeScan = 0 // เคลียร์ค่านี้ด้วยเพื่อความชัวร์
         }
     }
 
@@ -158,15 +195,22 @@ class Screen5Activity : AppCompatActivity() {
     }
 
     private fun showWrongPartDialog(rawBarcode: String, expectedKbn: String) {
-        // หั่นเอาแค่ตรงท้ายๆ มาโชว์ให้ User ดูคร่าวๆ หรือโชว์ทั้งก้อน
         val scannedKbnDisplay = if (rawBarcode.length >= 72) rawBarcode.substring(68, 72).trim() else rawBarcode
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("❌ WRONG PART!")
         builder.setMessage("คุณสแกนผิดชิ้นครับ!\n\nข้อมูลที่สแกนได้: KBN $scannedKbnDisplay\nที่ต้องหยิบ: KBN $expectedKbn\n\nกรุณาตรวจสอบของในกล่องอีกครั้ง!")
+        builder.setCancelable(false)
         builder.setPositiveButton("OK") { dialog, _ ->
             dialog.dismiss()
-            edtBox.requestFocus()
+
+            edtBox.post {
+                isProcessingScan = true // ล็อก
+                edtBox.setText(currentBoxCount.toString())
+                edtBox.selectAll()
+                edtBox.requestFocus()
+                isProcessingScan = false // ปลดล็อก
+            }
         }
         builder.create().show()
     }

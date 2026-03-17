@@ -22,7 +22,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.content.res.ColorStateList
-
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import android.view.inputmethod.EditorInfo
+import android.text.Editable
+import android.text.TextWatcher
 class Screen4Activity : AppCompatActivity() {
 
     private lateinit var db: AppDatabase
@@ -37,6 +41,8 @@ class Screen4Activity : AppCompatActivity() {
 
     private var myPartList = mutableListOf<InventoryItem>()
     private var selectedAddress: String = ""
+    private var scanJob: Job? = null
+
 
     private val startScreen5ForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK || result.resultCode == Activity.RESULT_CANCELED) {
@@ -73,15 +79,47 @@ class Screen4Activity : AppCompatActivity() {
         edtFastScan.showSoftInputOnFocus = false
 
         // ดักจับข้อมูลหลังสแกนเสร็จ (กด Enter)
-        edtFastScan.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+        // ------------------------------------------------------------------
+        // ระบบดักจับการสแกนแบบอัตโนมัติ 100% (ไม่ต้องกด Enter เอง)
+        // ------------------------------------------------------------------
+
+        // ด่านที่ 1: ดักจับด้วย TextWatcher + หน่วงเวลา (เผื่อปืนสแกนไม่มีปุ่ม Enter ปิดท้าย)
+        edtFastScan.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val text = s?.toString()?.trim() ?: ""
+
+                // ถ้ายาวเกิน 10 ตัวอักษร ให้สันนิษฐานว่ากำลังสแกนบาร์โค้ด
+                if (text.length > 10) {
+                    scanJob?.cancel() // ถ้ายิงเข้ามาต่อเนื่องให้ยกเลิกเวลานับถอยหลังอันเก่า
+                    scanJob = lifecycleScope.launch {
+                        delay(250) // รอ 300 มิลลิวินาที ให้เครื่องสแกนยิงข้อความจนครบทุกตัว
+
+                        val rawBarcode = edtFastScan.text.toString().trim()
+                        if (rawBarcode.isNotEmpty()) {
+                            processFastScan(rawBarcode)
+                            edtFastScan.text.clear() // เคลียร์ช่องให้ว่างพร้อมสแกนตัวต่อไป
+                        }
+                    }
+                }
+            }
+        })
+
+        // ด่านที่ 2: ดักจับจากปุ่ม Enter หรือ Action Done ของปืนสแกน (ทำงานทันทีไม่ต้องรอ 300ms)
+        edtFastScan.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+
+                scanJob?.cancel() // ยกเลิกด่านที่ 1 เพื่อไม่ให้ทำงานซ้ำซ้อน
+
                 val rawBarcode = edtFastScan.text.toString().trim()
                 if (rawBarcode.isNotEmpty()) {
                     processFastScan(rawBarcode)
-                    // เมื่อเช็คเสร็จ เคลียร์ข้อมูลชุดยาวๆ ในช่องทิ้งทันที
                     edtFastScan.text.clear()
                 }
-                return@setOnKeyListener true
+                return@setOnEditorActionListener true
             }
             false
         }
